@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.nash.product.mapper.crato.CratoMapper">
+
+    <resultMap id="BaseResultMap" type="com.nash.product.entity.crato.BusinessType">
+        <result column="id" jdbcType="BIGINT" property="id" />
+        <result column="name" jdbcType="VARCHAR" property="name" />
+        <result column="product" jdbcType="VARCHAR" property="product" />
+        <result column="service_type" jdbcType="VARCHAR" property="serviceType" />
+        <result column="fixed_space" jdbcType="BIGINT" property="fixedSpace" />
+        <result column="used" jdbcType="BIGINT" property="used" />
+        <result column="op_num" jdbcType="BIGINT" property="opNum" />
+        <result column="date_time"  property="dateTime" />
+        <result column="expired_time"  property="expiredTime" />
+
+    </resultMap>
+
+    <select id="selectCratoBusinessByName" resultMap="BaseResultMap">
+        select id,name,product,service_type,fixed_space,used,op_num,expired_time,fixed_space-used  as unused,expired_time from crato_business_type where name = #{name}
+    </select>
+
+    <insert id="insertBusiness" parameterType="com.nash.product.entity.crato.BusinessType">
+        insert into crato_business_type (name, product, service_type, fixed_space, op_num, date_time,expired_time)
+        values (#{name,jdbcType=VARCHAR}, #{product,jdbcType=VARCHAR}, #{serviceType,jdbcType=VARCHAR},
+        #{fixedSpace},  #{opNum,jdbcType=BIGINT},now(),#{expiredTime})
+    </insert>
+    <update id="update" parameterType="com.nash.product.entity.crato.BusinessType">
+        update crato_business_type
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="used != null">used =used+ #{used},</if>
+            <if test="fixedSpace != null">fixed_space =fixed_Space+ #{fixedSpace},</if>
+            <if test="expiredTime != null">expired_time=#{expiredTime} ,</if>
+        </trim>
+        where name = #{name}
+    </update>
+</mapper>

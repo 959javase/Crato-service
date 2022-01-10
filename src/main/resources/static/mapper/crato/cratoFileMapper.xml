@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.nash.product.mapper.crato.CratoFileMapper">
+
+    <resultMap id="BaseResultMap" type="com.nash.product.entity.crato.CratoFileRecord">
+        <result column="id" jdbcType="BIGINT" property="id" />
+        <result column="name" jdbcType="VARCHAR" property="name" />
+        <result column="file_name" jdbcType="VARCHAR" property="fileName" />
+        <result column="cid" jdbcType="VARCHAR" property="cid" />
+        <result column="file_size" jdbcType="BIGINT" property="fileSize" />
+        <result column="cost" jdbcType="BIGINT" property="cost" />
+        <result column="date_time"  property="dateTime" />
+        <result column="expired_time"  property="expiredTime" />
+    </resultMap>
+
+    <select id="selectFilesByCondition" resultMap="BaseResultMap">
+        select id,name,file_name,cid,file_size,cost,date_time, expired_time from crato_file_record where name = #{name}
+        <if test="fileName != null and fileName !=''">
+            AND file_name  like  #{fileName}
+        </if>
+<!--        <if test="belong != null">
+            AND belong  like  #{belong}
+        </if>-->
+ <!--       <if test="expiredTime != null">
+            AND expired_time  like  #{expiredTime}
+        </if>-->
+
+    </select>
+
+    <select id="selectFilesGroupByName" resultType="com.nash.product.entity.crato.CratoFileRecord">
+        select name, sum(file_size) as file_size from crato_file_record where date_time >= #{param1} and date_time <![CDATA[ <  ]]> #{param2}
+        group by name order by file_size limit 1000
+    </select>
+
+    <insert id="insertFile" parameterType="com.nash.product.entity.crato.CratoFileRecord">
+        insert into crato_file_record (name, file_name, cid, file_size, cost, date_time, expired_time)
+        values (#{name,jdbcType=VARCHAR}, #{fileName,jdbcType=VARCHAR}, #{cid,jdbcType=VARCHAR}, #{fileSize,jdbcType=BIGINT},
+        #{cost,jdbcType=BIGINT}, sysdate(), #{expiredTime,jdbcType=BIGINT})
+    </insert>
+
+    <!--<insert id="insert" parameterType="com.example.entity.User">
+        insert into User (userId, userName, phone,
+        sex)
+        values (#{userid,jdbcType=INTEGER}, #{username,jdbcType=VARCHAR}, #{phone,jdbcType=VARCHAR},
+        #{sex,jdbcType=VARCHAR})
+    </insert>
+    <insert id="insertSelective" parameterType="com.example.entity.User">
+        insert into User
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="userid != null">
+                userId,
+            </if>
+            <if test="username != null">
+                userName,
+            </if>
+            <if test="phone != null">
+                phone,
+            </if>
+            <if test="sex != null">
+                sex,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="userid != null">
+                #{userid,jdbcType=INTEGER},
+            </if>
+            <if test="username != null">
+                #{username,jdbcType=VARCHAR},
+            </if>
+            <if test="phone != null">
+                #{phone,jdbcType=VARCHAR},
+            </if>
+            <if test="sex != null">
+                #{sex,jdbcType=VARCHAR},
+            </if>
+        </trim>
+    </insert>
+    <select id="findAllUser" resultType="com.example.entity.User">
+        select * from User
+    </select>-->
+
+    <insert id="batchInsertIndicator">
+        insert into crato_indicator (name, file_size, down_size, qps, cost,period,date_time)
+        select bt.name,
+        IFNULL(t.file_size,0),
+        IFNULL(down_size,0),
+        IFNULL(qps,0),
+        IFNULL(cost,0),
+        DATE_FORMAT(#{endTime},'%Y-%m-%d %H:%i:%s') period ,SYSDATE()
+        from crato_business_type bt left join
+        (select name,sum(case type when '0' then file_size ELSE 0 end)file_size,
+        sum(case type when '1' then file_size ELSE 0 end)down_size,
+        count(1) qps,
+        sum(cost) cost
+        from crato_file_record
+         where date_time >=DATE_FORMAT(#{startTime},'%Y-%m-%d %H:%i:%s')
+           and date_time <![CDATA[ <  ]]> DATE_FORMAT(#{endTime},'%Y-%m-%d %H:%i:%s')
+        group by name) t on t.name=bt.name
+    </insert>
+</mapper>

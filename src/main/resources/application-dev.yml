@@ -1,0 +1,49 @@
+server:
+  port: 8080
+  error:
+    include-exception: true
+    include-message: always
+
+# 测试
+
+spring:
+  redis:
+    host: 127.0.0.1
+    port: 6379
+    password: 
+  datasource:
+   url: jdbc:mysql://localhost:3306/nashcloud_test?serverTimezone=Asia/Shanghai&useUnicode=true&characterEncoding=utf8
+   driver-class-name: com.mysql.cj.jdbc.Driver
+   username: root
+   password: root
+mybatis:
+  mapper-locations: classpath:/static/mapper/**/*.xml
+  typeAliasesPackage: com.nash.entity
+  configuration:
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+
+# JWT
+jwt:
+  header: 
+  secret: 
+  #token有效期一天
+  expiration: 30
+  tokenHead: 
+
+logging:
+  config: classpath:logback-spring.xml
+  file:
+    path: log/
+
+wechat:
+  #公众号id
+  appId: 
+  #商户号ID
+  mchId: 
+  #商户密钥
+  apiV3Key: 
+  mchSerialNo: 
+  #证书路径
+  privateKey: 
+  #回调链接
+  notifyUrl: 
